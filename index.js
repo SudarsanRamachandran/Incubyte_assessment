@@ -80,6 +80,10 @@ class LoginPage {
 (async function testSignupSignoutSignin() {
     const driver = new Builder().forBrowser('chrome').build();
 
+    // Maximise the browser window
+    await driver.manage().window().maximize();
+
+
     const firstName = 'Test';
     const lastName = 'User';
     const fullName = `${firstName} ${lastName}`;
@@ -105,12 +109,29 @@ class LoginPage {
         await loginPage.open();
         await loginPage.login(email, password);
 
-        // Verify login success
-        await driver.wait(until.elementLocated(By.css('.welcome')), 10000);
-        const welcomeText = await driver.findElement(By.css('.welcome')).getText();
-        assert(welcomeText.includes(`Welcome ${fullName}!`));
+        // Locate the welcome text
+    const welcomeElement = await driver.wait(
+        until.elementLocated(By.css('.logged-in')),
+        10000
+    );
 
-        console.log('Test passed: Signup, signout, and login successful.');
+    // Ensure text is fully rendered
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Fetch the welcome text
+    const welcomeText = await welcomeElement.getText();
+    console.log('Actual Welcome Text:', welcomeText);
+
+    // Assertion
+    assert.strictEqual(
+        welcomeText.trim(),
+        `Welcome, ${fullName}!`,
+        `Expected welcome text to be "Welcome, ${fullName}!", but got "${welcomeText}".`
+    );
+
+   
+    console.log('Test passed: Signup, signout, and login successful.');
+
     } catch (error) {
         console.error('Test failed:', error);
     } finally {
